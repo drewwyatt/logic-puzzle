@@ -24,7 +24,12 @@ class Graph {
 
   is = (option: Option, flagback: boolean) => {
     const idx = this.#relationships[option.category.id].indexOf(option)
-    invariant(idx === -1, `[${this.#self.id}][is] option "${option.id}" is impossible`)
+    invariant(
+      idx !== -1,
+      `[${this.#self.id}][is] option "${option.id}" is impossible
+found: [${this.#relationships[option.category.id].map(o => o.id).join(', ')}].
+    `,
+    )
 
     if (flagback) {
       option.is(this.#self, false)
@@ -64,6 +69,8 @@ export class Option {
     this.#graph = new Graph(this, categories)
   }
 
+  getAnswer = (category: Category): Option | null => this.#graph!.getAnswer(category)
+  possibilities = (category: Category): Option[] => this.#graph!.possibilities(category)
   is = (option: Option, flagback: boolean = true) => this.#graph!.is(option, flagback)
   not = (option: Option, flagback: boolean = true) => this.#graph!.not(option, flagback)
 }
