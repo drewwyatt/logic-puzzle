@@ -67,6 +67,8 @@ export class Option {
     this.#graph!.getAnswer(getCategory(category))
   possibilities = (category: AnyCategory): Option[] =>
     this.#graph!.possibilities(getCategory(category))
-  is = (option: Option, flagback: boolean = true) => this.#graph!.is(option, flagback)
-  not = (option: Option, flagback: boolean = true) => this.#graph!.not(option, flagback)
+  is = (option: Option, token: Symbol = Symbol(`${this.id}.is(${option.id})`)) =>
+    this.#graph!.is(option, token)
+  not = (option: Option, token: Symbol = Symbol(`${this.id}.not(${option.id})`)) =>
+    this.#graph!.not(option, token)
 }
