@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { Category, KnownCategory, Option } from './models'
+import { AnyCategory, Category, KnownCategory, Option } from './models'
 
 // 1. genres.country.not(orders.fourth)
 //
@@ -26,7 +26,7 @@ let bandNames: KnownCategory<typeof bandNameIds>
 let genres: KnownCategory<typeof genreIds>
 let orders: KnownCategory<typeof orderIds>
 let songTitles: KnownCategory<typeof songTitleIds>
-let categories: Category[]
+let categories: AnyCategory[]
 
 beforeEach(() => {
   bandNames = Category.From('bandName', bandNameIds)
@@ -37,7 +37,7 @@ beforeEach(() => {
   categories = [bandNames, genres, orders, songTitles]
 
   for (const category of categories) {
-    category.link(categories)
+    category._.link(categories)
   }
 })
 
@@ -66,10 +66,10 @@ describe('Filtering Possibilities', () => {
     genres.country.not(orders.fourth)
 
     expect(genres.country.possibilities(orders)).toEqual(
-      orders.options.filter(opt => opt !== orders.fourth),
+      orders._.options.filter(opt => opt !== orders.fourth),
     )
     expect(orders.fourth.possibilities(genres)).toEqual(
-      genres.options.filter(opt => opt !== genres.country),
+      genres._.options.filter(opt => opt !== genres.country),
     )
   })
 

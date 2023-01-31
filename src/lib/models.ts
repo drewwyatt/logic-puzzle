@@ -2,6 +2,10 @@ import invariant from 'tiny-invariant'
 
 export type Clue = string
 
+export type AnyCategory = { _: Category } | Category
+const getCategory = (category: AnyCategory): Category =>
+  category instanceof Category ? category : category._
+
 type Relationships = Record<string, Option[]>
 class Graph {
   #self: Option
@@ -69,15 +73,17 @@ export class Option {
     this.#graph = new Graph(this, categories)
   }
 
-  getAnswer = (category: Category): Option | null => this.#graph!.getAnswer(category)
-  possibilities = (category: Category): Option[] => this.#graph!.possibilities(category)
+  getAnswer = (category: AnyCategory): Option | null =>
+    this.#graph!.getAnswer(getCategory(category))
+  possibilities = (category: AnyCategory): Option[] =>
+    this.#graph!.possibilities(getCategory(category))
   is = (option: Option, flagback: boolean = true) => this.#graph!.is(option, flagback)
   not = (option: Option, flagback: boolean = true) => this.#graph!.not(option, flagback)
 }
 
-export type KnownCategory<T extends string[] | readonly string[]> = Category & {
-  [k in T[number]]: Option
-}
+export type KnownCategory<T extends string[] | readonly string[]> = {
+  [key in T[number]]: Option
+} & { _: Category }
 
 export class Category {
   id: string
@@ -92,9 +98,12 @@ export class Category {
     id: string,
     options: T,
   ): KnownCategory<T> => {
-    const category = new Category(id, options) as KnownCategory<T>
+    const category = {
+      _: new Category(id, options),
+    } as KnownCategory<T>
+
     for (const option of options) {
-      ;(category as any)[option] = category.get(option)
+      ;(category as any)[option] = category._.get(option)
     }
 
     return category
@@ -107,10 +116,10 @@ export class Category {
     return option
   }
 
-  link = (categories: Category[]) => {
-    const other = categories.filter(c => c != this)
+  link = (categories: AnyCategory[]) => {
+    const linkableCategories = categories.map(getCategory).filter(c => c != this)
     for (const option of this.options) {
-      option.link(other)
+      option.link(linkableCategories)
     }
   }
 }
