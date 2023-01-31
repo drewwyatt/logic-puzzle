@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { AnyCategory, Category, KnownCategory, Option } from './models'
+import { AnyCategory, Category, KnownCategory, Option } from './category'
 
 // 1. genres.country.not(orders.fourth)
 //
@@ -26,7 +26,7 @@ let bandNames: KnownCategory<typeof bandNameIds>
 let genres: KnownCategory<typeof genreIds>
 let orders: KnownCategory<typeof orderIds>
 let songTitles: KnownCategory<typeof songTitleIds>
-let categories: AnyCategory[]
+let categories: KnownCategory<any>[]
 
 beforeEach(() => {
   bandNames = Category.From('bandName', bandNameIds)
@@ -34,7 +34,7 @@ beforeEach(() => {
   orders = Category.From('order', orderIds)
   songTitles = Category.From('songTitle', songTitleIds)
 
-  categories = [bandNames, genres, orders, songTitles]
+  categories = [bandNames, genres, orders, songTitles] as any // ???
 
   for (const category of categories) {
     category._.link(categories)
@@ -43,9 +43,9 @@ beforeEach(() => {
 
 describe('Basic Setup', () => {
   it('Creates categories without errors', () => {
-    expect(bandNames instanceof Category).toEqual(true)
-    expect(genres instanceof Category).toEqual(true)
-    expect(songTitles instanceof Category).toEqual(true)
+    expect(bandNames._ instanceof Category).toEqual(true)
+    expect(genres._ instanceof Category).toEqual(true)
+    expect(songTitles._ instanceof Category).toEqual(true)
   })
 
   it('Allows options to be accessed through names properties', () => {
@@ -58,8 +58,8 @@ describe('Basic Setup', () => {
 
 describe('Filtering Possibilities', () => {
   it('Returns all category options before any filtering', () => {
-    expect(genres.country.possibilities(orders)).toEqual(orders.options)
-    expect(orders.fourth.possibilities(genres)).toEqual(genres.options)
+    expect(genres.country.possibilities(orders)).toEqual(orders._.options)
+    expect(orders.fourth.possibilities(genres)).toEqual(genres._.options)
   })
 
   it('Removes the options from both sets of possibilities when using "not"', () => {
